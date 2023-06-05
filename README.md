@@ -1,6 +1,7 @@
 # LibHaLo Demo Application - React.js (web)
 
-This is the demonstrative project which provides the usage example of [LibHaLo](https://github.com/arx-research/libhalo).
+This is the demonstrative project which provides the usage example
+of [LibHaLo](https://github.com/arx-research/libhalo).
 
 ## Run the project
 

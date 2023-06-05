@@ -1,42 +1,52 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './App.css';
 import {execHaloCmdWeb} from "@arx-research/libhalo/api/web.js";
 
 function App() {
-  const [statusText, setStatusText] = useState('Click on the button');
+    const [statusText, setStatusText] = useState('Click on the button');
 
-  async function btnClick() {
-    let command = {
-      name: "sign",
-      keyNo: 1,
-      message: "010203",
-      /* uncomment the line below if you get an error about setting "command.legacySignCommand = true" */
-      // legacySignCommand: true,
-    };
+    async function btnClick() {
+        let command = {
+            name: "sign",
+            keyNo: 1,
+            message: "010203",
+            /* uncomment the line below if you get an error about setting "command.legacySignCommand = true" */
+            // legacySignCommand: true,
+        };
 
-    let res;
+        let res;
 
-    try {
-      // --- request NFC command execution ---
-      res = await execHaloCmdWeb(command);
-      // the command has succeeded, display the result to the user
-      setStatusText(JSON.stringify(res, null, 4));
-    } catch (e) {
-      // the command has failed, display error to the user
-      setStatusText(String(e));
+        try {
+            // --- request NFC command execution ---
+            res = await execHaloCmdWeb(command, {
+                statusCallback: (cause) => {
+                    if (cause === "init") {
+                        setStatusText("Please tap the tag to the back of your smartphone and hold it...");
+                    } else if (cause === "retry") {
+                        setStatusText("Something went wrong, please try to tap the tag again...");
+                    } else if (cause === "scanned") {
+                        setStatusText("Tag scanned successfully, post-processing the result...");
+                    } else {
+                        setStatusText(cause);
+                    }
+                }
+            });
+            // the command has succeeded, display the result to the user
+            setStatusText(JSON.stringify(res, null, 4));
+        } catch (e) {
+            // the command has failed, display error to the user
+            setStatusText('Scanning failed, click on the button again to retry. Details: ' + String(e));
+        }
     }
-  }
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        <pre style={{fontSize: 12, textAlign: "left"}}>
-          {statusText}
-        </pre>
-        <button onClick={() => btnClick()}>Sign message 010203 using key #1</button>
-      </header>
-    </div>
-  );
+    return (
+        <div className="App">
+            <pre style={{fontSize: 12, textAlign: "left", whiteSpace: "pre-wrap", wordWrap: "break-word"}}>
+                {statusText}
+            </pre>
+            <button onClick={() => btnClick()}>Sign message 010203 using key #1</button>
+        </div>
+    );
 }
 
 export default App;
